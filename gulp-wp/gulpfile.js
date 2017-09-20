@@ -7,7 +7,7 @@ var pathToHost =  'localhost/wordpress';
 
 
 // ---  Require Gulp Libraries  ------
-
+var fs              = require('fs');
 var gulp 			= require('gulp');
 var sass 			= require('gulp-sass');
 var notify 			= require('gulp-notify');
@@ -24,12 +24,27 @@ var clean			= require('gulp-clean-css');
 var useref			= require('gulp-useref');
 var gulpIf 			= require('gulp-if');
 var sourcemaps 	    = require('gulp-sourcemaps');
+var autoprefixer    = require('gulp-autoprefixer');
+var rename          = require('gulp-rename');
 var plumberErrorHandler = { errorHandler: notify.onError({
 	title: 'Gulp',
 	message: 'Error: <%= error.message %>'
 })
 };
 
+const AUTOPREFIXER_BROWSERS = [
+    'last 2 version',
+    '> 1%',
+    'ie >= 9',
+    'ie_mob >= 10',
+    'ff >= 30',
+    'chrome >= 34',
+    'safari >= 7',
+    'opera >= 23',
+    'ios >= 7',
+    'android >= 4',
+    'bb >= 10'
+  ];
 
 
 
@@ -40,26 +55,34 @@ var plumberErrorHandler = { errorHandler: notify.onError({
 gulp.task('sass', function(){
     var filterCSS = filter('app/css/*.css', { restore: true });
 
-	return gulp.src('app/scss/**/*.scss')    
+	return gulp.src('app/scss/**/style.scss')    
 		.pipe(plumber(plumberErrorHandler))
 		.pipe(sass({
             style: 'compressed',
 			includePaths: [
-               	'app/sass',
-               	'bower_components/bootstrap-sass/assets/stylesheets',
-                'bower_components/font-awesome/scss'
+               	'app/scss',
+               	'app/scss/libs/bootstrap-sass/assets/stylesheets',
+                'app/scss/libs/font-awesome/scss'
    	       ]
   	     }))
         .pipe(sourcemaps.init())
+        .pipe(autoprefixer(AUTOPREFIXER_BROWSERS))
 		.pipe(gulp.dest('app/css'))
         .pipe(filterCSS)
         .pipe(concat('theme-styles.css'))
         .pipe(clean())
-        .pipe(sourcemaps.write('/maps'))
+        .pipe(sourcemaps.write( '/maps' ))
         .pipe(gulp.dest('../' + themeDir + '/css'))
 		.pipe(browserSync.reload({
 			stream: true
 		}))
+});
+
+gulp.task('js', function(){
+    return gulp.src('app/js/*.js')
+        .pipe(concat('theme-scripts.js'))
+        .pipe(uglify())
+        .pipe(dest('../' + themeDir  + '/js/'))
 });
 
 gulp.task('browserSync', function(){
@@ -73,10 +96,9 @@ gulp.task('browserSync', function(){
 
 gulp.task('watch', ['browserSync', 'sass'], function(){
 	gulp.watch('app/scss/**/*.scss', ['sass']);
-    gulp.watch('app/js/**/*.js', browserSync.reload)
+    gulp.watch('app/js/**/*.js', [ 'js', browserSync.reload ] )
     gulp.watch('../' + themeDir + '/**/*.php', browserSync.reload);
 	// gulp.watch('app/*.html', browserSync.reload);
-	
 });
 
 
@@ -89,14 +111,29 @@ gulp.task('bower', function() {
         .pipe(gulp.dest('bower_components'))
 });
 
-gulp.task('fonts', function() {
+// WARNING this will override customizations made to bootstrap
+gulp.task('vendorscss', function(){
+    var filterSCSS = filter('**/*.scss', { restore: true });
+    return gulp.src('./bower_components/**/*.scss')
+        .pipe(gulp.dest('app/scss/libs'));
+})
+
+gulp.task('vendorfonts', function() {
     console.log("fonts: ", themeDir + '/fonts/');
 	return gulp.src('./bower_components/**/*.{eot,svg,ttf,woff,woff2}')
+        .pipe(rename(function(path){
+            if(path.basename == /^glyphicons.*$/){
+                 path.dirname = '/bootstrap/';
+             } else {
+                 path.dirname = '/';
+             }
+           
+        }))
     	.pipe(gulp.dest('../' + themeDir + '/fonts/'));
 
 });
 
-gulp.task('js', function() {
+gulp.task('vendorjs', function() {
 	var filterJS = filter('**/*.js', { restore: true });
     return gulp.src('bower.json')
         .pipe(mainBowerFiles({
@@ -123,14 +160,12 @@ gulp.task('js', function() {
         .pipe(gulp.dest('../' + themeDir + '/js'));
 });
 
-gulp.task('css', function(){
-	return gulp.src('app/css/*')
-		.pipe(clean())
-		.pipe(gulp.dest('../' + themeDir + '/css'))
-});
+gulp.task('dirExists', function(){
+    console.log('Bootstrap directory exists, to overwrite sass files, run "gulp vendorscss"');
+})
 
 // Run at start of project to initiate bower/libraries
-gulp.task('default', ['bower', 'js', 'fonts', 'sass']);
+gulp.task('default', ['bower', 'vendorjs', 'vendorfonts', gulpIf(fs.existsSync('app/scss/libs/bootstrap-sass'), 'dirExists', 'vendorscss'), 'sass']);
 
 
 
