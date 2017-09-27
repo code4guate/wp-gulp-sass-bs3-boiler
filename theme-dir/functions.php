@@ -123,10 +123,10 @@ function html5blank_styles()
 
 function htmlblank_scripts()
 {
-    wp_register_script('vendorscripts', get_template_directory_uri() . '/js/vendor.js', array(''), '1.0.0', true); // Custom scripts    
+    wp_register_script('vendorscripts', get_template_directory_uri() . '/js/vendor.js', array(), '1.0.0', true); // Custom scripts    
     wp_enqueue_script('vendorscripts'); // Enqueue it!
 
-    wp_register_script('themescripts', get_template_directory_uri() . '/js/vendor.js', array('vendorscripts'), '1.0.0', true); // Custom scripts    
+    wp_register_script('themescripts', get_template_directory_uri() . '/js/theme-scripts.js', array('vendorscripts'), '1.0.0', true); // Custom scripts    
     wp_enqueue_script('themescripts'); // Enqueue it!
 }
 
