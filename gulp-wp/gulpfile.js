@@ -8,27 +8,27 @@ var pathToHost =  'localhost/wordpress';
 
 // ---  Require Gulp Libraries  ------
 var fs              = require('fs');
-var gulp 			= require('gulp');
-var sass 			= require('gulp-sass');
-var notify 			= require('gulp-notify');
-var plumber 		= require('gulp-plumber');
-var browserSync 	= require('browser-sync').create();
-var mainBowerFiles 	= require('main-bower-files');
-var filter 			= require('gulp-filter');
-var concat 			= require('gulp-concat');
-var uglify 			= require('gulp-uglify');
-var bower 			= require('gulp-bower');
-var order 			= require('gulp-order');
-var minify			= require('gulp-minify');
-var clean			= require('gulp-clean-css');
-var useref			= require('gulp-useref');
-var gulpIf 			= require('gulp-if');
-var sourcemaps 	    = require('gulp-sourcemaps');
+var gulp            = require('gulp');
+var sass            = require('gulp-sass');
+var notify          = require('gulp-notify');
+var plumber         = require('gulp-plumber');
+var browserSync     = require('browser-sync').create();
+var mainBowerFiles  = require('main-bower-files');
+var filter          = require('gulp-filter');
+var concat          = require('gulp-concat');
+var uglify          = require('gulp-uglify');
+var bower           = require('gulp-bower');
+var order           = require('gulp-order');
+var minify          = require('gulp-minify');
+var clean           = require('gulp-clean-css');
+var useref          = require('gulp-useref');
+var gulpIf          = require('gulp-if');
+var sourcemaps      = require('gulp-sourcemaps');
 var autoprefixer    = require('gulp-autoprefixer');
 var rename          = require('gulp-rename');
 var plumberErrorHandler = { errorHandler: notify.onError({
-	title: 'Gulp',
-	message: 'Error: <%= error.message %>'
+    title: 'Gulp',
+    message: 'Error: <%= error.message %>'
 })
 };
 
@@ -48,34 +48,26 @@ const AUTOPREFIXER_BROWSERS = [
 
 
 
-
-
-
 // Compile Sass 
 gulp.task('sass', function(){
     var filterCSS = filter('app/css/*.css', { restore: true });
 
-	return gulp.src('app/scss/**/style.scss')    
-		.pipe(plumber(plumberErrorHandler))
-		.pipe(sass({
-            style: 'compressed',
-			includePaths: [
-               	'app/scss',
-               	'app/scss/libs/bootstrap-sass/assets/stylesheets',
-                'app/scss/libs/font-awesome/scss'
-   	       ]
-  	     }))
+    return gulp.src('app/scss/**/style.scss')    
+        .pipe(plumber(plumberErrorHandler))
         .pipe(sourcemaps.init())
+        .pipe(sass({
+            style: 'compressed'
+         }))
         .pipe(autoprefixer(AUTOPREFIXER_BROWSERS))
-		.pipe(gulp.dest('app/css'))
+        .pipe(gulp.dest('app/css'))
         .pipe(filterCSS)
         .pipe(concat('theme-styles.css'))
         .pipe(clean())
         .pipe(sourcemaps.write( '/maps' ))
         .pipe(gulp.dest('../' + themeDir + '/css'))
-		.pipe(browserSync.reload({
-			stream: true
-		}))
+        .pipe(browserSync.reload({
+            stream: true
+        }))
 });
 
 gulp.task('js', function(){
@@ -86,7 +78,7 @@ gulp.task('js', function(){
 });
 
 gulp.task('browserSync', function(){
-	browserSync.init({
+    browserSync.init({
         proxy: pathToHost,
         injectChanges: true,
         // Use a specific port.
@@ -95,14 +87,11 @@ gulp.task('browserSync', function(){
 });
 
 gulp.task('watch', ['browserSync', 'sass'], function(){
-	gulp.watch('app/scss/**/*.scss', ['sass']);
+    gulp.watch('app/scss/**/*.scss', ['sass']);
     gulp.watch('app/js/**/*.js', [ 'js', browserSync.reload ] )
     gulp.watch('../' + themeDir + '/**/*.php', browserSync.reload);
-	// gulp.watch('app/*.html', browserSync.reload);
+    // gulp.watch('app/*.html', browserSync.reload);
 });
-
-
-
 
 
 // Prep Bower Components
@@ -120,7 +109,7 @@ gulp.task('vendorscss', function(){
 
 gulp.task('vendorfonts', function() {
     console.log("fonts: ", themeDir + '/fonts/');
-	return gulp.src('./bower_components/**/*.{eot,svg,ttf,woff,woff2}')
+    return gulp.src('./bower_components/**/*.{eot,svg,ttf,woff,woff2}')
         .pipe(rename(function(path){
             var re = new RegExp("^glyphicons.*$");
             if(re.test(path.basename)){
@@ -130,12 +119,12 @@ gulp.task('vendorfonts', function() {
              }
            
         }))
-    	.pipe(gulp.dest('../' + themeDir + '/fonts/'));
+        .pipe(gulp.dest('../' + themeDir + '/fonts/'));
 
 });
 
 gulp.task('vendorjs', function() {
-	var filterJS = filter('**/*.js', { restore: true });
+    var filterJS = filter('**/*.js', { restore: true });
     return gulp.src(mainBowerFiles('**/*.js'))
         .pipe(filterJS)
         .pipe(concat('vendor.js'))
@@ -167,17 +156,17 @@ gulp.task('default', ['bower', 'vendorjs', 'vendorfonts', gulpIf(fs.existsSync('
 
 // // BUILD Client Code/Files
 // gulp.task('buildFonts', function(){
-// 	return gulp.src('app/fonts/*')
-// 		.pipe(gulp.dest('dist/fonts'))
+//  return gulp.src('app/fonts/*')
+//      .pipe(gulp.dest('dist/fonts'))
 // })
 
 // // Prepairs ugly code
 // gulp.task('useref', function(){
-// 	return gulp.src('app/*.html')
-// 		.pipe(useref())
-// 		.pipe(gulpIf('*.js', uglify()))
-// 		.pipe(gulpIf('*.css', clean()))
-// 		.pipe(gulp.dest('dist'))
+//  return gulp.src('app/*.html')
+//      .pipe(useref())
+//      .pipe(gulpIf('*.js', uglify()))
+//      .pipe(gulpIf('*.css', clean()))
+//      .pipe(gulp.dest('dist'))
 // })
 
 // gulp.task('build', ['buildFonts', 'useref']);
