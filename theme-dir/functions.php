@@ -56,6 +56,12 @@ if (function_exists('add_theme_support'))
 
     // Localisation Support
     load_theme_textdomain('html5blank', get_template_directory() . '/languages');
+
+    // Adds custom logo with size restraints 
+    add_theme_support( 'custom-logo', array(
+        'height'      => 28,
+        'width'       => 278
+    ) );
 }
 
 /*------------------------------------*\
@@ -401,9 +407,17 @@ add_shortcode('html5_shortcode_demo_2', 'html5_shortcode_demo_2'); // Place [htm
 // Shortcodes above would be nested like this -
 // [html5_shortcode_demo] [html5_shortcode_demo_2] Here's the page title! [/html5_shortcode_demo_2] [/html5_shortcode_demo]
 
+include(get_template_directory() . 'custom_shortcodes.php'); // Write Shortcodes in this file
+add_shortcode('social_icons_sc', 'social_icons'); // Includes the shortcode for social_icons
+
+
+
 /*------------------------------------*\
     Custom Post Types
 \*------------------------------------*/
+
+
+
 
 // Create 1 Custom Post type for a Demo, called HTML5-Blank
 function create_post_type_html5()
