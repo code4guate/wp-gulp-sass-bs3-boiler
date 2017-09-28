@@ -305,6 +305,13 @@ function enable_threaded_comments()
     }
 }
 
+// Add video as featured immage option
+function set_video_for_fp_background( $original_img, $fp_single_id , $featured_page_id ) {
+    if ( 'one' != $fp_single_id )
+        return $original_img ;
+    return sprintf('<iframe style="max-width:none;position: absolute;left: -86px;" src="//player.vimeo.com/video/39312923?title=0&amp;byline=0&amp;portrait=0&amp;color=ffffff&amp;autoplay=1&amp;loop=1" width="445" height="250" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>');
+}
+
 // Custom Comments Callback
 function html5blankcomments($comment, $args, $depth)
 {
@@ -396,6 +403,7 @@ add_filter('show_admin_bar', 'remove_admin_bar'); // Remove Admin bar
 add_filter('style_loader_tag', 'html5_style_remove'); // Remove 'text/css' from enqueued stylesheet
 add_filter('post_thumbnail_html', 'remove_thumbnail_dimensions', 10); // Remove width and height dynamic attributes to thumbnails
 add_filter('image_send_to_editor', 'remove_thumbnail_dimensions', 10); // Remove width and height dynamic attributes to post images
+add_filter('fp_img_src' , 'set_video_for_fp_background' , 10 , 3); // add video as featured image option
 
 // Remove Filters
 remove_filter('the_excerpt', 'wpautop'); // Remove <p> tags from Excerpt altogether
